@@ -185,6 +185,17 @@ locationPlotter_f = function(
          col=c('royalblue2', 'royalblue4', 'orangered2'), lty = 3:1, cex=1.2, box.lty=0)
 }
 
+check_aws_credentials <- function() {
+  required_vars <- c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION")
+  missing_vars <- required_vars[!nzchar(Sys.getenv(required_vars))]
+  
+  if (length(missing_vars) > 0) {
+    stop("Missing required AWS environment variables: ", 
+         paste(missing_vars, collapse = ", "))
+  }
+}
+
+
 get_aws_signed_url <- function(file, bucket = "my_bucket_name", timeout_seconds = 30, key = "my_jey", secret = "my_secret", region = "us-east-1"){
   # API Implmented according to https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html#query-string-auth-v4-signing-example
   algorithm <- "AWS4-HMAC-SHA256"
@@ -228,6 +239,7 @@ get_aws_signed_url <- function(file, bucket = "my_bucket_name", timeout_seconds 
 # Function to read .tif files from S3 with region specification
 read_tif_from_s3 <- function(bucket, object_key) {
   # Create a temporary file
+  check_aws_credentials()
   temp_file <- tempfile(fileext = ".tif")
   
   # Download the S3 object to the temporary file
@@ -251,6 +263,7 @@ read_tif_from_s3 <- function(bucket, object_key) {
 
 # Function to read .h5 files from S3 with region specification
 read_h5_from_s3 <- function(bucket, object_key) {
+  check_aws_credentials()
   # Create a temporary file
   temp_file <- tempfile(fileext = ".h5")
   
@@ -272,6 +285,7 @@ read_h5_from_s3 <- function(bucket, object_key) {
 
 # Function to read CSV directly from S3 using data.table::fread
 read_csv_from_s3_direct <- function(bucket, object_key) {
+  check_aws_credentials()
   require(aws.s3)
   require(data.table)
   
@@ -295,6 +309,7 @@ read_csv_from_s3_direct <- function(bucket, object_key) {
 
 # Function to read GeoJSON files from S3
 read_geojson_from_s3 <- function(bucket, object_key) {
+  check_aws_credentials()
   require(aws.s3)
   require(sf)
   

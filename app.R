@@ -16,14 +16,23 @@ library(shinythemes)
 library(aws.s3)
 
 source("helperFunctions.R")
-myNotes = fread("Data/myNotes.csv")
-s3_bucket_name <- "climate-ai-data-science-shiny-app-data"
 
-Sys.setenv(
-  "AWS_ACCESS_KEY_ID" = myNotes$this[1],       # Replace with your Access Key ID
-  "AWS_SECRET_ACCESS_KEY" = myNotes$that[1], # Replace with your Secret Access Key
-  "AWS_DEFAULT_REGION" = myNotes$theOther[1]
-)
+# new system
+# Load environment variables at startup
+if (file.exists(".Renviron")) {
+  readRenviron(".Renviron")
+}
+s3_bucket_name <- "climate-ai-data-science-shiny-app-data"
+check_aws_credentials()
+
+
+# old system
+#myNotes = fread("Data/myNotes.csv")
+#Sys.setenv(
+#  "AWS_ACCESS_KEY_ID" = myNotes$this[1],       # Replace with your Access Key ID
+#  "AWS_SECRET_ACCESS_KEY" = myNotes$that[1], # Replace with your Secret Access Key
+#  "AWS_DEFAULT_REGION" = myNotes$theOther[1]
+#)
 
 # Read local CSV files as before
 customerInputTable = data.table::fread("Data/DIU_locations_Nov2024_ed.csv")
@@ -40,7 +49,7 @@ myMetadata = read_csv_from_s3_direct(bucket = s3_bucket_name, object_key = "rive
 options(spinner.type = 6)
 
 ui <- fluidPage(theme = shinytheme("flatly"),
-                titlePanel(title=div(img(src="CAi2.png", height=60, width=200), "    Flood Hazard (beta)")),
+                titlePanel(title=div(img(src="CAi2.png", height=60, width=200), "    River Monitor and Forecasts (beta)")),
                 
                 sidebarLayout(
                   position='left',
@@ -87,12 +96,12 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                           column(2,
                                  selectInput("whichDecade", "Decade:",
                                              c("Current"=2020, "2050s"=2050))
-#                                 ),
-#                          column(2,
-#                                 radioButtons(inputId = "depthOrOccurrence",
-#                                              label = "Units:",
-#                                              choiceValues = c(1,2),
-#                                              choiceNames = c("Depth (m)", "Occurrence"))
+                                 ),
+                          column(2,
+                                 radioButtons(inputId = "depthOrOccurrence",
+                                              label = "Units:",
+                                              choiceValues = c(1,2),
+                                              choiceNames = c("Depth (m)", "Occurrence"))
                           )
                         ),
                         hr(), 
